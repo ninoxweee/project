@@ -1,0 +1,41 @@
+import discord
+from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont
+
+import io
+
+
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix='/', intents=intents)
+
+
+def create_meme(top_text, bottom_text, template_path='template.jpg'):
+    img = Image.open(template_path)
+    draw = ImageDraw.Draw(img)
+    
+    
+    font = ImageFont.truetype("arial.ttf", 32)
+
+    
+    draw.text((10, 10), top_text.upper(), font=font, fill='white', stroke_width=2, stroke_fill='black')
+
+   
+    width, height = img.size
+    text_width, text_height = draw.textsize(bottom_text.upper(), font=font)
+    draw.text((10, height - text_height - 10), bottom_text.upper(), font=font, fill='white', stroke_width=2, stroke_fill='black')
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG")
+    buffer.seek(0)
+    return buffer
+
+
+@bot.command()
+async def meme(ctx, top: str, bottom: str):
+    await ctx.send("Sedang membuat meme...")
+    meme_image = create_meme(top, bottom)
+    file = discord.File(meme_image, filename="meme.jpg")
+    await ctx.send(file=file)
+
+
+bot.run('TOKEN_DISCORD_ANDA')
